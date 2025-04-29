@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #6366f1;
+        --primary-hover: #4f46e5;
+        --secondary-color: #f59e0b;
+        --accent-color: #ec4899;
+        --light-bg: #f8fafc;
+    }
+    
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: all 0.4s ease;
+    }
+    
+    .product-image-container:hover {
+        box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
+    }
+    
+    .product-image {
+        transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+    
+    .product-image-container:hover .product-image {
+        transform: scale(1.05);
+    }
+    
+    .add-to-cart-btn {
+        transition: all 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        letter-spacing: 0.5px;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .add-to-cart-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    }
+    
+    .add-to-cart-btn:active {
+        transform: translateY(1px);
+    }
+    
+    .product-badge {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 2;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .related-product-card {
+        transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: none;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    
+    .related-product-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-item {
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.4s ease;
+        margin-bottom: 8px;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .info-item:hover {
+        background: var(--light-bg);
+        border-left: 4px solid var(--accent-color);
+        transform: translateX(5px);
+    }
+    
+    .price-tag {
+        position: relative;
+        display: inline-block;
+        padding: 8px 16px;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+    
+    .old-price {
+        position: relative;
+    }
+    
+    .old-price:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 2px;
+        background: var(--accent-color);
+        transform: rotate(-5deg);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.8s ease forwards;
+    }
+    
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 30px;
+    }
+    
+    .section-title:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -8px;
+        width: 50%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        border-radius: 2px;
+    }
+    
+    .btn-outline-primary {
+        transition: all 0.3s ease;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-5 fade-in">
+        <!-- Product Image Column -->
+        <div class="col-lg-6">
+            <div class="product-image-container">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'img/no_image.png' %}" class="product-image" alt="No image">
+                {% endif %}
+                
+                {% if product.available %}
+                    <div class="product-badge">
+                        <span class="badge bg-success px-3 py-2">
+                            <i class="fas fa-check-circle me-1"></i> En stock
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Product Details Column -->
+        <div class="col-lg-6">
+            <div class="ps-lg-4">
+                <!-- Category -->
+                <div class="mb-3">
+                    <a href="{{ product.category.get_absolute_url }}" class="text-decoration-none" style="color: var(--accent-color);">
+                        {{ product.category.name }}
+                    </a>
+                </div>
+                
+                <!-- Product Name -->
+                <h1 class="mb-3 fw-bold" style="color: #1e293b;">{{ product.name }}</h1>
+                
+                <!-- Price -->
+                <div class="d-flex align-items-center mb-4">
+                    <span class="h3 fw-bold price-tag me-3">{{ product.price }} €</span>
+                    {% if product.old_price %}
+                        <span class="text-muted old-price">{{ product.old_price }} €</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Description -->
+                <div class="mb-4">
+                    <h5 class="mb-3" style="color: var(--primary-color);">Description</h5>
+                    <div class="text-gray-700" style="line-height: 1.7;">
+                        {{ product.description|linebreaks }}
+                    </div>
+                </div>
+                
+                <!-- Add to Cart Form -->
+                {% if product.available %}
+                    <form action="{% url 'shopping_cart:cart_add' product.id %}" method="post" class="mb-5">
+                        {% csrf_token %}
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-4">
+                                <label for="quantity" class="form-label">Quantité</label>
+                                <input type="number" name="quantity" id="quantity" 
+                                       class="form-control" value="1" min="1" max="10"
+                                       style="border: 2px solid #e2e8f0; border-radius: 8px;">
+                            </div>
+                            <div class="col-md-8">
+                                <button type="submit" class="btn add-to-cart-btn text-white w-100 py-3 mt-md-0 mt-3"
+                                        style="border-radius: 10px;">
+                                    <i class="fas fa-shopping-cart me-2"></i> Ajouter au panier
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="alert alert-warning" style="border-radius: 10px; border-left: 4px solid var(--secondary-color);">
+                        <i class="fas fa-exclamation-circle me-2" style="color: var(--secondary-color);"></i> 
+                        Produit actuellement indisponible
+                    </div>
+                {% endif %}
+                
+                <!-- Product Info -->
+                <div class="border-top pt-4">
+                    <h5 class="mb-4 section-title" style="color: var(--primary-color);">Informations sur le produit</h5>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item info-item py-3 px-4 bg-transparent">
+                            <i class="fas fa-truck me-2" style="color: var(--primary-color);"></i>
+                            <strong>Livraison:</strong> Gratuite sous 2-3 jours
+                        </div>
+                        <div class="list-group-item info-item py-3 px-4 bg-transparent">
+                            <i class="fas fa-undo me-2" style="color: var(--primary-color);"></i>
+                            <strong>Retours:</strong> Acceptés sous 30 jours
+                        </div>
+                        <div class="list-group-item info-item py-3 px-4 bg-transparent">
+                            <i class="fas fa-shield-alt me-2" style="color: var(--primary-color);"></i>
+                            <strong>Paiement:</strong> 100% sécurisé
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+        <div class="mt-5 pt-5 border-top fade-in">
+            <h3 class="mb-4 fw-bold section-title" style="color: var(--primary-color);">Produits similaires</h3>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                {% for product in related_products %}
+                    <div class="col">
+                        <div class="card related-product-card h-100">
+                            <a href="{{ product.get_absolute_url }}" class="text-decoration-none text-dark">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="card-img-top p-3" alt="{{ product.name }}" style="height: 200px; object-fit: contain;">
+                                {% else %}
+                                    <img src="{% static 'img/no_image.png' %}" class="card-img-top p-3" alt="No image" style="height: 200px; object-fit: contain;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name|truncatechars:40 }}</h5>
+                                    <p class="card-text fw-bold" style="color: var(--primary-color);">{{ product.price }} €</p>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 pt-0 pb-3">
+                                    <button class="btn btn-outline-primary w-100" style="border-radius: 8px;">
+                                        Voir les détails
+                                    </button>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Paiement annulé{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h2 class="mb-0">
+                    <i class="fas fa-exclamation-circle me-2"></i>Paiement annulé
+                </h2>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-times-circle text-warning" style="font-size: 4rem;"></i>
+                </div>
+                <h3 class="mb-4">Paiement non effectué</h3>
+                <p class="lead">
+                    Votre commande #{{ order.id }} n'a pas été payée.
+                </p>
+                <p>
+                    Si vous souhaitez réessayer, vous pouvez retourner à la page de paiement.
+                </p>
+                <div class="mt-4">
+                    <a href="{% url 'orders:payment_process' order.id %}" class="btn btn-primary me-2">
+                        <i class="fas fa-credit-card me-2"></i>Réessayer le paiement
+                    </a>
+                    <a href="{% url 'shopping_cart:cart_detail' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-shopping-cart me-2"></i>Retour au panier
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}Nos produits{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #FF5E78;
+        --secondary-color: #A5FFD6;
+        --accent-color: #FFD166;
+        --light-color: #F7F7FF;
+        --dark-color: #2B2D42;
+        --text-color: #4A4A4A;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
+        --gradient-primary: linear-gradient(135deg, var(--primary-color), #FF8E8E);
+        --gradient-secondary: linear-gradient(135deg, var(--secondary-color), #8AFFD6);
+    }
+    
+    /* Cartes de catégories */
+    .category-card {
+        transition: var(--transition);
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+        background: white;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(255, 94, 120, 0.15);
+    }
+    
+    .category-card .card-header {
+        background: var(--gradient-primary);
+        padding: 1.5rem;
+        color: white;
+    }
+    
+    /* Cartes de produits */
+    .product-card {
+        transition: var(--transition);
+        border: none;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+        background: white;
+        position: relative;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(255, 94, 120, 0.15);
+    }
+    
+    .product-card .card-img-top {
+        height: 280px;
+        object-fit: cover;
+        transition: var(--transition);
+    }
+    
+    .product-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    /* Carousel */
+    .carousel-product {
+        height: 500px;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .carousel-caption {
+        background: rgba(255, 94, 120, 0.9);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        left: 10%;
+        right: 10%;
+        bottom: 20%;
+        backdrop-filter: blur(5px);
+    }
+    
+    .carousel-indicators button {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.5);
+        border: none;
+        transition: var(--transition);
+    }
+    
+    .carousel-indicators button.active {
+        background-color: white;
+        transform: scale(1.3);
+    }
+    
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 50px;
+        height: 50px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        top: 50%;
+        transform: translateY(-50%);
+        backdrop-filter: blur(5px);
+        transition: var(--transition);
+    }
+    
+    .carousel-control-prev:hover,
+    .carousel-control-next:hover {
+        background-color: rgba(255, 255, 255, 0.4);
+    }
+    
+    /* Sidebar */
+    .category-sidebar {
+        position: sticky;
+        top: 20px;
+    }
+    
+    .list-group-item {
+        border: none;
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+        color: var(--dark-color);
+        transition: var(--transition);
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(255, 94, 120, 0.05);
+        padding-left: 2rem;
+    }
+    
+    .list-group-item.active {
+        background: var(--gradient-primary);
+        color: white;
+    }
+    
+    /* Boutons */
+    .btn-primary {
+        background: var(--gradient-primary);
+        border: none;
+        padding: 0.7rem 1.8rem;
+        border-radius: 50px;
+        font-weight: 600;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 94, 120, 0.3);
+    }
+    
+    .btn-outline-primary {
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        background: transparent;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 94, 120, 0.2);
+    }
+    
+    /* Typographie */
+    .featured-title {
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-weight: 700;
+    }
+    
+    .product-price {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1.25rem;
+    }
+    
+    .category-title {
+        position: relative;
+        padding-bottom: 15px;
+        font-weight: 700;
+        color: var(--dark-color);
+    }
+    
+    .category-title:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 60px;
+        height: 3px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+    
+    /* État vide */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .empty-state img {
+        max-height: 180px;
+        margin-bottom: 2rem;
+    }
+    
+    /* Pagination */
+    .pagination .page-item .page-link {
+        border: none;
+        color: var(--dark-color);
+        margin: 0 5px;
+        border-radius: 50% !important;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .pagination .page-item:not(.active) .page-link:hover {
+        background-color: rgba(255, 94, 120, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .carousel-product {
+            height: 350px;
+        }
+        
+        .carousel-caption {
+            bottom: 10%;
+            padding: 1rem;
+        }
+        
+        .carousel-caption h3 {
+            font-size: 1.3rem;
+        }
+        
+        .carousel-caption p {
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    {% if not category %}
+    <!-- Carousel -->
+    <div id="featuredCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            {% for product in featured_products %}
+            <button type="button" data-bs-target="#featuredCarousel" data-bs-slide-to="{{ forloop.counter0 }}" 
+                    {% if forloop.first %}class="active" aria-current="true"{% endif %} 
+                    aria-label="Slide {{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        <div class="carousel-inner">
+            {% for product in featured_products %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %} carousel-product">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="d-block w-100 h-100" alt="{{ product.name }}" style="object-fit: cover;">
+                {% else %}
+                <img src="{% static 'img/no_image.png' %}" class="d-block w-100 h-100" alt="No image" style="object-fit: cover;">
+                {% endif %}
+                <div class="carousel-caption d-none d-md-block text-center">
+                    <h3 class="display-5 fw-bold featured-title mb-3">{{ product.name }}</h3>
+                    <p class="fs-3 featured-title mb-4">{{ product.price }} €</p>
+                    <a href="{{ product.get_absolute_url }}" class="btn btn-light btn-lg px-4 py-2">
+                        <i class="fas fa-arrow-right me-2"></i> Découvrir
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#featuredCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#featuredCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card category-card category-sidebar">
+                <div class="card-header text-white">
+                    <h4 class="mb-0"><i class="fas fa-list me-2"></i> Catégories</h4>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'products:product_list' %}" 
+                       class="list-group-item list-group-item-action {% if not category %}active{% endif %}">
+                        <i class="fas fa-boxes me-2"></i> Tous les produits
+                    </a>
+                    {% for c in categories %}
+                    <a href="{{ c.get_absolute_url }}" 
+                       class="list-group-item list-group-item-action {% if category.slug == c.slug %}active{% endif %}">
+                        <i class="fas fa-tag me-2"></i> {{ c.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des produits -->
+        <div class="col-lg-9">
+            {% if category %}
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h2 class="mb-0 category-title">{{ category.name }}</h2>
+                <small class="text-muted">{{ products|length }} produit(s)</small>
+            </div>
+            {% endif %}
+
+            {% if products %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card product-card h-100">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        {% else %}
+                        <img src="{% static 'img/no_image.png' %}" class="card-img-top" alt="No image">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text text-muted mb-4">{{ product.description|truncatechars:80 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4 product-price">{{ product.price }} €</span>
+                                <a href="{{ product.get_absolute_url }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i> Voir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <img src="{% static 'img/empty-box.png' %}" alt="Empty" class="img-fluid mb-4">
+                <h3 class="text-muted mb-3">Aucun produit disponible</h3>
+                <p class="text-muted mb-4">Nous n'avons trouvé aucun produit dans cette catégorie.</p>
+                <a href="{% url 'products:product_list' %}" class="btn btn-primary mt-3 px-4">
+                    <i class="fas fa-arrow-left me-2"></i> Retour aux produits
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Pagination -->
+            {% if products.paginator.num_pages > 1 %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.previous_page_number }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if products.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ products.next_page_number }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialisation du carousel avec intervalle
+    document.addEventListener('DOMContentLoaded', function() {
+        var myCarousel = document.getElementById('featuredCarousel');
+        if (myCarousel) {
+            var carousel = new bootstrap.Carousel(myCarousel, {
+                interval: 5000,
+                wrap: true
+            });
+        }
+    });
+</script>
+{% endblock %}

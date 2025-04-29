@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Panier{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    .cart-container:hover {
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .cart-header {
+        background: #8a2be2;  /* Couleur move */
+        color: white;
+        padding: 1.25rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .cart-header:after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.1);
+        transform: rotate(30deg);
+        pointer-events: none;
+    }
+    
+    .table-responsive {
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+    
+    .cart-table {
+        margin-bottom: 0;
+    }
+    
+    .cart-table thead th {
+        background: #f8f9fa;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .cart-item {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    
+    .cart-item:hover {
+        background: rgba(138, 43, 226, 0.03);  /* Teinte move très légère */
+    }
+    
+    .quantity-control {
+        display: flex;
+        align-items: center;
+    }
+    
+    .quantity-input {
+        width: 60px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 0.375rem;
+        margin: 0 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .quantity-input:focus {
+        border-color: #8a2be2;  /* Couleur move */
+        box-shadow: 0 0 0 0.2rem rgba(138, 43, 226, 0.25);
+    }
+    
+    .btn-update {
+        color: #8a2be2;  /* Couleur move */
+        border: none;
+        background: none;
+        transition: all 0.3s ease;
+        padding: 0.5rem;
+    }
+    
+    .btn-update:hover {
+        transform: rotate(180deg);
+        color: #6a1bb8;
+    }
+    
+    .btn-remove {
+        color: #dc3545;
+        background: none;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-remove:hover {
+        transform: scale(1.2);
+        color: #c82333;
+    }
+    
+    .empty-cart {
+        padding: 3rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-cart-icon {
+        font-size: 5rem;
+        color: #e2e3e5;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+    
+    .btn-continue {
+        border: 2px solid #8a2be2;  /* Couleur move */
+        color: #8a2be2;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .btn-continue:hover {
+        background: #8a2be2;  /* Couleur move */
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-checkout {
+        background: #ff69b4;  /* Couleur rose */
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1.5rem;
+        box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+    }
+    
+    .btn-checkout:hover {
+        background: #e6499e;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 105, 180, 0.4);
+    }
+    
+    .total-row {
+        background: rgba(138, 43, 226, 0.05);  /* Teinte move */
+        font-weight: 600;
+    }
+    
+    .product-link {
+        color: #343a40;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+    
+    .product-link:hover {
+        color: #8a2be2;  /* Couleur move */
+        text-decoration: none;
+    }
+    
+    /* Effet de vague sur l'en-tête */
+    @keyframes wave {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="cart-container mb-5">
+                <div class="cart-header">
+                    <h2 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Votre panier</h2>
+                </div>
+                
+                <div class="card-body p-0">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show m-3">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if cart %}
+                        <div class="table-responsive">
+                            <table class="table cart-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Quantité</th>
+                                        <th>Prix unitaire</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart %}
+                                        <tr class="cart-item">
+                                            <td class="align-middle">
+                                                <a href="{{ item.product.get_absolute_url }}" class="product-link">
+                                                    <i class="fas fa-box-open me-2 text-muted"></i>
+                                                    {{ item.product.name }}
+                                                </a>
+                                            </td>
+                                            <td class="align-middle">
+                                                <form action="{% url 'shopping_cart:cart_update' item.product.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <div class="quantity-control">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary quantity-minus">-</button>
+                                                        <input type="number" name="quantity" value="{{ item.quantity }}" 
+                                                               min="1" max="99" class="quantity-input">
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary quantity-plus">+</button>
+                                                        <button type="submit" class="btn-update ms-2">
+                                                            <i class="fas fa-sync-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td class="align-middle">{{ item.price }} €</td>
+                                            <td class="align-middle">{{ item.total_price }} €</td>
+                                            <td class="align-middle">
+                                                <form action="{% url 'shopping_cart:cart_remove' item.product.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn-remove">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="total-row">
+                                        <td colspan="3" class="text-end fw-bold">Total</td>
+                                        <td class="fw-bold">{{ cart.get_total_price }} €</td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between p-3 bg-light">
+                            <a href="{% url 'products:product_list' %}" class="btn btn-continue">
+                                <i class="fas fa-chevron-left me-2"></i>Continuer mes achats
+                            </a>
+                            <a href="{% url 'orders:order_create' %}" class="btn btn-checkout">
+                                <i class="fas fa-check-circle me-2"></i>Passer commande
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="empty-cart">
+                            <div class="empty-cart-icon">
+                                <i class="fas fa-shopping-basket"></i>
+                            </div>
+                            <h3 class="mb-3">Votre panier est vide</h3>
+                            <p class="text-muted mb-4">Commencez votre shopping pour remplir votre panier</p>
+                            <a href="{% url 'products:product_list' %}" class="btn btn-checkout">
+                                <i class="fas fa-store me-2"></i>Explorer la boutique
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Script pour les boutons +/-
+    document.querySelectorAll('.quantity-plus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentNode.querySelector('.quantity-input');
+            input.value = parseInt(input.value) + 1;
+        });
+    });
+    
+    document.querySelectorAll('.quantity-minus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.parentNode.querySelector('.quantity-input');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        });
+    });
+</script>
+{% endblock %}

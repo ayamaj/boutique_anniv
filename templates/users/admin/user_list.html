@@ -1,0 +1,101 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block title %}Utilisateurs{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">Utilisateurs</h2>
+                <a href="{% url 'admin:users_user_add' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Ajouter un utilisateur
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nom d'utilisateur</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Date d'inscription</th>
+                                <th>Dernière connexion</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.date_joined|date:"d/m/Y" }}</td>
+                                    <td>{{ user.last_login|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Actif</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactif</span>
+                                        {% endif %}
+                                        {% if user.is_staff %}
+                                            <span class="badge bg-primary">Staff</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'admin:users_user_change' user.id %}" class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'admin:users_user_delete' user.id %}" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>Aucun utilisateur trouvé.
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if is_paginated %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

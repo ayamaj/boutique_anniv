@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Paiement de la commande #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Paiement de la commande #{{ order.id }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Montant à payer : <strong>{{ order.get_total_cost }} €</strong>
+                </div>
+
+                <form action="{% url 'orders:payment_process' order.id %}" method="post" id="payment-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="card-element" class="form-label">Informations de carte</label>
+                        <div id="card-element" class="form-control">
+                            <!-- Un élément Stripe Card sera inséré ici. -->
+                        </div>
+                        <div id="card-errors" class="invalid-feedback" role="alert"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100" id="submit-button">
+                        <i class="fas fa-credit-card me-2"></i>Payer {{ order.get_total_cost }} €
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    var stripe = Stripe('{{ stripe_publishable_key }}');
+    var elements = stripe.elements();
+    var card = elements.create('card');
+    card.mount('#card-element');
+
+    card.addEventListener('change', function(event) {
+        var displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+            displayError.style.display = 'block';
+        } else {
+            displayError.textContent = '';
+            displayError.style.display = 'none';
+        }
+    });
+
+    var form = document.getElementById('payment-form');
+    var submitButton = document.getElementById('submit-button');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Traitement...';
+
+        stripe.createToken(card).then(function(result) {
+            if (result.error) {
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = result.error.message;
+                errorElement.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Payer {{ order.get_total_cost }} €';
+            } else {
+                var hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'hidden');
+                hiddenInput.setAttribute('name', 'stripeToken');
+                hiddenInput.setAttribute('value', result.token.id);
+                form.appendChild(hiddenInput);
+                form.submit();
+            }
+        });
+    });
+</script>
+{% endblock %} 

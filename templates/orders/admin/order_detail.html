@@ -1,0 +1,120 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block title %}Commande #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Commande #{{ order.id }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5>Informations client</h5>
+                        <p>
+                            <strong>Nom :</strong> {{ order.first_name }} {{ order.last_name }}<br>
+                            <strong>Email :</strong> <a href="mailto:{{ order.email }}">{{ order.email }}</a><br>
+                            <strong>Adresse :</strong><br>
+                            {{ order.address }}<br>
+                            {{ order.postal_code }} {{ order.city }}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Informations commande</h5>
+                        <p>
+                            <strong>Date :</strong> {{ order.created|date:"d/m/Y H:i" }}<br>
+                            <strong>Dernière mise à jour :</strong> {{ order.updated|date:"d/m/Y H:i" }}<br>
+                            <strong>Statut :</strong>
+                            <span class="badge {% if order.status == 'delivered' %}bg-success{% elif order.status == 'shipped' %}bg-info{% elif order.status == 'processing' %}bg-warning{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ order.get_status_display }}
+                            </span><br>
+                            <strong>Paiement :</strong>
+                            {% if order.paid %}
+                                <span class="badge bg-success">Payé</span>
+                            {% else %}
+                                <span class="badge bg-danger">Non payé</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Produits commandés</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Prix unitaire</th>
+                                        <th>Quantité</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order.items.all %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'admin:products_product_change' item.product.id %}">
+                                                    {{ item.product.name }}
+                                                </a>
+                                            </td>
+                                            <td>{{ item.price }} €</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>{{ item.get_cost }} €</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-primary">
+                                        <td colspan="3" class="text-end"><strong>Total</strong></td>
+                                        <td><strong>{{ order.get_total_cost }} €</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="POST" class="mt-4">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_status" class="form-label">Mettre à jour le statut</label>
+                                <select name="status" id="id_status" class="form-select">
+                                    {% for value, label in order.STATUS_CHOICES %}
+                                        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_paid" class="form-label">Statut du paiement</label>
+                                <select name="paid" id="id_paid" class="form-select">
+                                    <option value="1" {% if order.paid %}selected{% endif %}>Payé</option>
+                                    <option value="0" {% if not order.paid %}selected{% endif %}>Non payé</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                    </button>
+                    <a href="{% url 'admin:orders_order_changelist' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

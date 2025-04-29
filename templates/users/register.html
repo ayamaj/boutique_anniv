@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Inscription</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Informations personnelles</h5>
+                            {{ form.email|crispy }}
+                            {{ form.first_name|crispy }}
+                            {{ form.last_name|crispy }}
+                            {{ form.phone|crispy }}
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Adresse</h5>
+                            {{ form.address|crispy }}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {{ form.postal_code|crispy }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.city|crispy }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Sécurité</h5>
+                            {{ form.password1|crispy }}
+                            {{ form.password2|crispy }}
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="mb-3">Préférences</h5>
+                            <div class="form-check">
+                                {{ form.newsletter|crispy }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>S'inscrire
+                        </button>
+                    </div>
+                </form>
+                <div class="border-top pt-3 mt-3">
+                    <small class="text-muted">
+                        Vous avez déjà un compte ? <a href="{% url 'users:login' %}">Connectez-vous</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

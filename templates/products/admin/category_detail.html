@@ -1,0 +1,143 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">{{ category.name }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Informations de la catégorie</h5>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-3">Nom</dt>
+                                    <dd class="col-sm-9">{{ category.name }}</dd>
+
+                                    <dt class="col-sm-3">Slug</dt>
+                                    <dd class="col-sm-9">{{ category.slug }}</dd>
+
+                                    <dt class="col-sm-3">Date de création</dt>
+                                    <dd class="col-sm-9">{{ category.created|date:"d/m/Y H:i" }}</dd>
+
+                                    <dt class="col-sm-3">Dernière mise à jour</dt>
+                                    <dd class="col-sm-9">{{ category.updated|date:"d/m/Y H:i" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Statistiques</h5>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="card bg-primary text-white">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Produits</h6>
+                                                <h3 class="mb-0">{{ category.products.count }}</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card bg-success text-white">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title">Produits disponibles</h6>
+                                                <h3 class="mb-0">{{ category.available_products.count }}</h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Produits de cette catégorie</h5>
+                        <a href="{% url 'admin:products_product_add' %}?category={{ category.id }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-2"></i>Ajouter un produit
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Nom</th>
+                                        <th>Prix</th>
+                                        <th>Stock</th>
+                                        <th>Disponible</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in category.products.all %}
+                                        <tr>
+                                            <td>
+                                                {% if product.image %}
+                                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-thumbnail" style="max-width: 50px;">
+                                                {% else %}
+                                                    <div class="bg-light text-center" style="width: 50px; height: 50px; line-height: 50px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ product.name }}</td>
+                                            <td>{{ product.price }} €</td>
+                                            <td>{{ product.stock }}</td>
+                                            <td>
+                                                {% if product.available %}
+                                                    <span class="badge bg-success">Oui</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Non</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'admin:products_product_change' product.id %}" class="btn btn-sm btn-primary me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'admin:products_product_delete' product.id %}" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="6" class="text-center">
+                                                <div class="alert alert-info">
+                                                    <i class="fas fa-info-circle me-2"></i>Aucun produit dans cette catégorie.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'admin:products_category_change' category.id %}" class="btn btn-primary me-2">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </a>
+                    <a href="{% url 'admin:products_category_delete' category.id %}" class="btn btn-danger me-2">
+                        <i class="fas fa-trash me-2"></i>Supprimer
+                    </a>
+                    <a href="{% url 'admin:products_category_changelist' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,133 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block title %}Paramètres du site{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Paramètres du site</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Informations de la boutique</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="id_site_name" class="form-label">Nom du site</label>
+                                        <input type="text" name="site_name" id="id_site_name" class="form-control" value="{{ settings.site_name }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_site_description" class="form-label">Description du site</label>
+                                        <textarea name="site_description" id="id_site_description" class="form-control" rows="3">{{ settings.site_description }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_contact_email" class="form-label">Email de contact</label>
+                                        <input type="email" name="contact_email" id="id_contact_email" class="form-control" value="{{ settings.contact_email }}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_contact_phone" class="form-label">Téléphone de contact</label>
+                                        <input type="tel" name="contact_phone" id="id_contact_phone" class="form-control" value="{{ settings.contact_phone }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Adresse de la boutique</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="id_address" class="form-label">Adresse</label>
+                                        <textarea name="address" id="id_address" class="form-control" rows="3">{{ settings.address }}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_postal_code" class="form-label">Code postal</label>
+                                        <input type="text" name="postal_code" id="id_postal_code" class="form-control" value="{{ settings.postal_code }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="id_city" class="form-label">Ville</label>
+                                        <input type="text" name="city" id="id_city" class="form-control" value="{{ settings.city }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Paramètres de paiement</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_stripe_public_key" class="form-label">Clé publique Stripe</label>
+                                        <input type="text" name="stripe_public_key" id="id_stripe_public_key" class="form-control" value="{{ settings.stripe_public_key }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_stripe_secret_key" class="form-label">Clé secrète Stripe</label>
+                                        <input type="password" name="stripe_secret_key" id="id_stripe_secret_key" class="form-control" value="{{ settings.stripe_secret_key }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Paramètres de livraison</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_shipping_cost" class="form-label">Frais de livraison (€)</label>
+                                        <input type="number" name="shipping_cost" id="id_shipping_cost" class="form-control" value="{{ settings.shipping_cost }}" step="0.01" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_free_shipping_threshold" class="form-label">Seuil de livraison gratuite (€)</label>
+                                        <input type="number" name="free_shipping_threshold" id="id_free_shipping_threshold" class="form-control" value="{{ settings.free_shipping_threshold }}" step="0.01" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Paramètres de maintenance</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-3">
+                                <input type="checkbox" name="maintenance_mode" id="id_maintenance_mode" class="form-check-input" {% if settings.maintenance_mode %}checked{% endif %}>
+                                <label for="id_maintenance_mode" class="form-check-label">Mode maintenance</label>
+                            </div>
+                            <div class="mb-3">
+                                <label for="id_maintenance_message" class="form-label">Message de maintenance</label>
+                                <textarea name="maintenance_message" id="id_maintenance_message" class="form-control" rows="3">{{ settings.maintenance_message }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
